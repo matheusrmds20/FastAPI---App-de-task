@@ -1,0 +1,26 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from app.core.config import settings
+#Criacao do banco de dados
+
+
+
+engine = create_engine(
+    settings.DATABASE_URL, connect_args={"check_same_thread":False}
+)
+
+
+Base = declarative_base()
+
+
+SessionLocal =  sessionmaker(bind=engine)
+
+#Session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
