@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.database.database import get_db
+from app.db.database import get_db
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError

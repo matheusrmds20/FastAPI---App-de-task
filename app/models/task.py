@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
-from app.database.database import Base
+from app.db.database import Base
 
 
 #Tabela do banco de dados Para as tasks

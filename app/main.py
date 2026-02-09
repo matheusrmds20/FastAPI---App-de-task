@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from .database.database import engine
-from .models.task import Base
-from routes.tasks import router_task
-from routes.auth import router_auth
+from app.db.database import engine
+from app.models.task import Base
+from app.routes.tasks import router_task
+from app.routes.auth import router_auth
 import asyncio
 from fastapi.responses import StreamingResponse
 from app.core.config import settings

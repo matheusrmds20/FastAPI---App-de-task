@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.user import UserDB
-from app.database.database import get_db
-from schemas.user import Create_User
+from app.db.database import get_db
+from app.schemas.user import Create_User
 from app.core.security import hash_password, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 

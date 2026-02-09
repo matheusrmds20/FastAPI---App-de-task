@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from app.database.database import Base
+from app.db.database import Base
 
 
 #Tabela do banco de dados para usuarios
@@ -11,4 +11,4 @@ class UserDB(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password =  Column(String, nullable=False)
 
-    tasks = relationship("TasksDB", back_populates="proprietario")
+    Tasks = relationship("TasksDB", back_populates="proprietario")
