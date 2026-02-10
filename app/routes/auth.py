@@ -7,10 +7,6 @@ from app.schemas.user import Create_User
 from app.core.security import hash_password, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 
-
-
-
-
 #Caminho para o auth
 router_auth = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -34,8 +30,12 @@ def register(User: Create_User, db: Session = Depends(get_db)):
     except IntegrityError:
         db.rollback,
         raise HTTPException(status_code=409, detail="Email ja existente")
+    
+    except Exception:
+        db.rollback
+        raise
 
-        
+
     db.refresh(db_user)
     return db_user
 

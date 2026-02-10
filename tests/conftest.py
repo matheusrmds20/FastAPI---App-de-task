@@ -48,9 +48,6 @@ def client(db_session):
     del app.dependency_overrides[get_db]
 
 
-
-
-
 @pytest.fixture
 def user_token(client):
     payload={
