@@ -11,4 +11,4 @@ class UserDB(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password =  Column(String, nullable=False)
 
-    Tasks = relationship("TasksDB", back_populates="proprietario", cascade="all, delete-orphan")
+    Tasks = relationship("TasksDB", back_populates="proprietario")

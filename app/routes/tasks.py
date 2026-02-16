@@ -1,13 +1,12 @@
 from fastapi import APIRouter,Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.models.task import TasksDB
-from app.models.user import UserDB
-from app.schemas.task import *
-from app.schemas.user import *
-from app.dependencies.auth import get_current_user
-from app.services.task_service import *
-from app.services.exceptions import *
+from db.database import get_db
+from models.task import TasksDB
+from models.user import UserDB
+from schemas.task import *
+from schemas.user import *
+from dependencies.auth import get_current_user
+from services.task_services import TaskService
 
 #Caminho para a task
 router_task = APIRouter(
@@ -22,13 +21,11 @@ def create_task(
     db: Session = Depends(get_db),
     user: UserDB = Depends(get_current_user)
 ):
-
     try:
-        return TaskService.Create_task(db, user.id, task)
+        return TaskService.create_task(db, user.id, task)
     
-    except BadRequest as m:
-        error_detail = str(m) if str(m) else "Erro ao criar task"
-        raise HTTPException(status_code=400, detail=str(error_detail))
+    except ValueError as M:
+        raise HTTPException(status_code=400, detail=str(M))
 
 
 #Listar todas as Tasks, nao usar list = erro, apenas TaskResponse retorna um elemento, o que queremos aqui é uma lista de tasks
@@ -37,11 +34,11 @@ def list_task(
     db: Session = Depends(get_db),
     user: UserDB = Depends(get_current_user),
 ):
-    # Lista todas as tasks do usuario
     try:
-        return TaskService.List_tasks(db, user.id)
-    except BadRequest:
-        raise HTTPException(status_code=400, detail="Erro ao listar tasks")
+        return TaskService.list_tasks(db, user.id)
+    
+    except ValueError as M:
+        raise HTTPException(status_code=400, detail=str(M))
     
 
 #Listar Tasks por Id
@@ -52,29 +49,22 @@ def get_task(
         user: str =Depends(get_current_user),
 ):
     # Lisdta
-
     try:
-        return TaskService.List_by_id(db, task_id, user.id)
-    except BadRequest as m:
-        error_detail = str(m) if str(m) else "Erro ao listar task"
-        raise HTTPException(status_code=400,detail=str(error_detail))
-
-    
-
+        return TaskService.list_by_id(db, task_id, user.id)
+    except ValueError as M:
+        raise HTTPException(status_code=404, detail="Task nao encontrada")
 
 #Deletar Tasks
 @router_task.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(
+def get_task(
         task_id: int,
         db: Session = Depends(get_db),
         user: UserDB = Depends(get_current_user),
 ):
-
     try:
-        return TaskService.Delete_task(db, task_id, user.id)
-    except TaskNotFound as m:
-        raise HTTPException(status_code=404, detail=str(m))
-
+        return TaskService.delete_task(db, task_id, user.id)
+    except ValueError as M:
+        raise HTTPException(status_code=404, detail="Task nao encontrada")
 
 #Atualizar dados da task
 @router_task.patch("/{task_id}")
@@ -84,9 +74,7 @@ def update_task(
     db: Session = Depends(get_db),
     user: UserDB = Depends(get_current_user),
 ):
-
     try:
-        return TaskService.Update_task(db, task_id, user.id, task_update)
-    except BadRequest as m:
-        error_detail = str(m) if str(m) else "Erro ao atualizar task"
-        raise HTTPException(status_code=400, detail=str(error_detail))
+        return TaskService.update_task(db, task_id, user.id, task_update)
+    except ValueError as M:
+        raise HTTPException(status_code=400, detail="Algo deu errado")

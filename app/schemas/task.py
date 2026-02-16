@@ -1,10 +1,10 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 
 
 class TaskBase(BaseModel):
-    title: str
+    title: str = Field(min_length=1)
     description: Optional[str] = None
 
 

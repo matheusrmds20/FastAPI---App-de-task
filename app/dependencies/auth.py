@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.models.user import UserDB
 
 
+
 # Continuar com usuario logado se token valido
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

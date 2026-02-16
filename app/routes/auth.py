@@ -1,30 +1,43 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.models.user import UserDB
 from app.db.database import get_db
 from app.schemas.user import Create_User
-from app.core.security import verify_password, create_access_token
+from app.core.security import hash_password, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
-from app.services.exceptions import *
-from app.services.user_service import UserService
-from app.schemas.user import *
-from app.dependencies.auth import get_current_user
-
-
 
 #Caminho para o auth
 router_auth = APIRouter(prefix="/auth", tags=["Auth"])
 
 # Registrar usuario
-@router_auth.post("/register", response_model=UserRespose ,status_code=status.HTTP_201_CREATED)
-def register(user: Create_User, db: Session = Depends(get_db)):
+@router_auth.post("/register", status_code=status.HTTP_201_CREATED)
+def register(User: Create_User, db: Session = Depends(get_db)):
+    exist = db.query(UserDB).filter(UserDB.email == User.email).first()
+
+    if exist:
+        raise HTTPException(status_code=400, detail="Email ja existente")
+
+    db_user = UserDB(
+        email=User.email,
+        hashed_password= hash_password(User.password)
+    )
+
 
     try:
-        return UserService.Register(db, user)
-    except AlreadyExistError as m:
-        error_detail = str(m) if str(m) else "Algo deu errado"
-        raise HTTPException(status_code=400, detail=str(error_detail))
+        db.add(db_user)
+        db.commit()
+    except IntegrityError:
+        db.rollback,
+        raise HTTPException(status_code=409, detail="Email ja existente")
     
+    except Exception:
+        db.rollback
+        raise
+
+
+    db.refresh(db_user)
+    return db_user
 
 # Rota de login com token
 @router_auth.post("/login")
@@ -35,23 +48,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     # Rever esse User, parece pegar o primeiro email nao o que a gente quer
 
 
+    # Validacao com o banco de dados
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    try:
-        return UserService.login(db, form_data)
-    except BadRequest as m:
-        raise HTTPException(status_code=400, detail=(str(m)))
-    
-
-
-@router_auth.post("/me")
-def me(current: UserDB = Depends(get_current_user)):
-    return current
-
-
-
-
-
-
-
- 
+    token = create_access_token({"sub": str(user.id)})
+    return {"access_token": token, "token_type": "bearer"}
 
