@@ -11,8 +11,8 @@ __pycache__/
 .pytest_cache/
 
 # Banco de Dados Local (Importante não subir para não dar erro de conflito)
-*.sqlite3
-*.db
+*db.sqlite3
+*teste.db
 
 # Configurações e Segredos
 .env
