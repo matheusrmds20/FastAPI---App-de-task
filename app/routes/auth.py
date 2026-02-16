@@ -47,11 +47,3 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 def me(current: UserDB = Depends(get_current_user)):
     return current
 
-
-
-
-
-
-
- 
-

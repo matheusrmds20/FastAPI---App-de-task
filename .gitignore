@@ -1,0 +1,25 @@
+# Ambientes Virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Python (Cache e temporários)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Banco de Dados Local (Importante não subir para não dar erro de conflito)
+*.sqlite3
+*.db
+
+# Configurações e Segredos
+.env
+.vscode/
+.idea/
+
+# Distribuição / Pacotes
+dist/
+build/
+*.egg-info/
