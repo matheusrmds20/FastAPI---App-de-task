@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 
+
 # Entrada dos dados
 class Create_User(BaseModel):
     email: EmailStr
