@@ -1,12 +1,13 @@
 from fastapi import APIRouter,Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from db.database import get_db
-from models.task import TasksDB
-from models.user import UserDB
-from schemas.task import *
-from schemas.user import *
-from dependencies.auth import get_current_user
-from services.task_services import TaskService
+from app.db.database import get_db
+from app.models.task import TasksDB
+from app.models.user import UserDB
+from app.schemas.task import *
+from app.schemas.user import *
+from app.dependencies.auth import get_current_user
+from app.services.task_services import TaskService
+from app.services.exceptions import *
 
 #Caminho para a task
 router_task = APIRouter(
@@ -24,7 +25,7 @@ def create_task(
     try:
         return TaskService.create_task(db, user.id, task)
     
-    except ValueError as M:
+    except BadRequest as M:
         raise HTTPException(status_code=400, detail=str(M))
 
 
@@ -51,8 +52,8 @@ def get_task(
     # Lisdta
     try:
         return TaskService.list_by_id(db, task_id, user.id)
-    except ValueError as M:
-        raise HTTPException(status_code=404, detail="Task nao encontrada")
+    except TaskNotFound as M:
+        raise HTTPException(status_code=404, detail=str(M))
 
 #Deletar Tasks
 @router_task.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -63,8 +64,8 @@ def get_task(
 ):
     try:
         return TaskService.delete_task(db, task_id, user.id)
-    except ValueError as M:
-        raise HTTPException(status_code=404, detail="Task nao encontrada")
+    except BadRequest as M:
+        raise HTTPException(status_code=404, detail=str(M))
 
 #Atualizar dados da task
 @router_task.patch("/{task_id}")
@@ -76,5 +77,5 @@ def update_task(
 ):
     try:
         return TaskService.update_task(db, task_id, user.id, task_update)
-    except ValueError as M:
-        raise HTTPException(status_code=400, detail="Algo deu errado")
+    except BadRequest as M:
+        raise HTTPException(status_code=400, detail=str(M))

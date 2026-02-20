@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
-from schemas.task import TaskCreate, TaskUpdate
+from app.schemas.task import TaskCreate, TaskUpdate
 from sqlalchemy.exc import IntegrityError
-from models.task import TasksDB
+from app.models.task import TasksDB
+from app.services.exceptions import *
+from sqlalchemy import func
 
 
 class TaskService:
@@ -9,6 +11,17 @@ class TaskService:
 
     @staticmethod
     def create_task(db: Session, user_id: id, data: TaskCreate):
+        existing_task = db.query(TasksDB).filter(
+            func.lower(TasksDB.title) == func.lower(data.title)
+).first()
+
+        if existing_task:
+            raise AlreadyExistError("Task ja existente")
+        
+        if not data.title or data.title.strip() == "":
+            raise BadRequest("Titulo precisa ter ao menos um caracter")
+
+
         try:
             task = TasksDB(
                 title = data.title,
@@ -18,7 +31,7 @@ class TaskService:
 
             db.add(task)
             db.commit()
-            db.refresh(task) 
+            db.refresh(task)
 
             return task
 
@@ -28,20 +41,27 @@ class TaskService:
         
 
     @staticmethod
-    def list_tasks(db: Session, user_id: id):
+    def list_tasks(db: Session, user_id: id, page: int = 1, limit: int = 5):
+        offset = (page - 1) * limit
+
+
         tasks = db.query(TasksDB).filter(
-            TasksDB.user_id == user_id
-).all()
+            TasksDB.user_id == user_id).offset(offset).limit(limit).all()
 
 
         return tasks
     
+
+
     @staticmethod
     def list_by_id(db: Session,task_id: id ,user_id: id):
         task = db.query(TasksDB).filter(
             TasksDB.id == task_id,
             TasksDB.user_id == user_id
 ).first()
+        
+        if not task:
+            raise TaskNotFound()
 
 
         return task
@@ -49,6 +69,14 @@ class TaskService:
 
     @staticmethod
     def delete_task(db: Session, task_id: id, user_id: id):
+        
+        task_existence = db.query(TasksDB).filter(TasksDB.id == task_id).first()
+
+        if not task_existence:
+            raise TaskNotFound(task_id)
+
+
+
 
         task = TaskService.list_by_id(db, task_id, user_id)
 
@@ -65,9 +93,9 @@ class TaskService:
             for field, value in data.model_dump(exclude_unset=True).items():
                 setattr(task, field, value)
 
-                db.commit()
-                db.refresh(task)
-                return task
+            db.commit()
+            db.refresh(task)
+            return task
 
         except IntegrityError:
             db.rollback()
