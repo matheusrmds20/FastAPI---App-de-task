@@ -32,11 +32,22 @@ def create_task(
 #Listar todas as Tasks, nao usar list = erro, apenas TaskResponse retorna um elemento, o que queremos aqui é uma lista de tasks
 @router_task.get("/listar", response_model=list[TaskResponse])
 def list_task(
+    page: int = 1,
+    limit: int = 5,
+    order_by: str = "created_at",
+    status: str | None = None,
     db: Session = Depends(get_db),
     user: UserDB = Depends(get_current_user),
 ):
     try:
-        return TaskService.list_tasks(db, user.id)
+        return TaskService.list_tasks(
+            db,                     
+            user.id,
+            page,
+            limit,
+            order_by,
+            status
+)
     
     except ValueError as M:
         raise HTTPException(status_code=400, detail=str(M))
@@ -77,5 +88,9 @@ def update_task(
 ):
     try:
         return TaskService.update_task(db, task_id, user.id, task_update)
+    except TaskNotFound as M:
+        raise HTTPException(status_code=404, detail=str(M))
+    except NotAuthorized as M:
+        raise HTTPException(status_code=403, detail=str(M))
     except BadRequest as M:
         raise HTTPException(status_code=400, detail=str(M))
