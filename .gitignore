@@ -12,7 +12,7 @@ __pycache__/
 
 # Banco de Dados Local (Importante não subir para não dar erro de conflito)
 *db.sqlite3
-*test.db
+*app.db
 
 # Configurações e Segredos
 .env
