@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from app.db.database import Base
+from datetime import datetime
 
 
 #Tabela do banco de dados Para as tasks
@@ -10,7 +11,8 @@ class TasksDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    done = Column(Boolean,default=False) 
+    done = Column(Boolean,default=False)
+
     
     user_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE"),nullable=False)
 

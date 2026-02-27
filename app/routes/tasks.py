@@ -30,26 +30,26 @@ def create_task(
 
 
 #Listar todas as Tasks, nao usar list = erro, apenas TaskResponse retorna um elemento, o que queremos aqui é uma lista de tasks
-@router_task.get("/listar", response_model=list[TaskResponse])
+@router_task.get("/listar", response_model=TaskResponse)
 def list_task(
     page: int = 1,
     limit: int = 5,
-    order_by: str = "created_at",
+    order_by: str = "id",
     status: str | None = None,
     db: Session = Depends(get_db),
     user: UserDB = Depends(get_current_user),
 ):
     try:
         return TaskService.list_tasks(
-            db,                     
+            db, 
             user.id,
             page,
             limit,
-            order_by,
-            status
-)
+            status,
+            order_by
+        )
     
-    except ValueError as M:
+    except BadRequest as M:
         raise HTTPException(status_code=400, detail=str(M))
     
 
@@ -60,11 +60,13 @@ def get_task(
         db: Session = Depends(get_db),
         user: str =Depends(get_current_user),
 ):
-    # Lisdta
+    # Lista
     try:
         return TaskService.list_by_id(db, task_id, user.id)
     except TaskNotFound as M:
         raise HTTPException(status_code=404, detail=str(M))
+    except NotAuthorized as M:
+        raise HTTPException(status_code=403, detail=str(M))
 
 #Deletar Tasks
 @router_task.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -76,6 +78,10 @@ def get_task(
     try:
         return TaskService.delete_task(db, task_id, user.id)
     except BadRequest as M:
+        raise HTTPException(status_code=400, detail=str(M))
+    except NotAuthorized as M:
+        raise HTTPException(status_code=403, detail=str(M))
+    except TaskNotFound as M:
         raise HTTPException(status_code=404, detail=str(M))
 
 #Atualizar dados da task

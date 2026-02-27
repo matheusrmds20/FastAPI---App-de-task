@@ -45,36 +45,31 @@ class TaskService:
                    user_id: id, 
                    page: int = 1, 
                    limit: int = 5, 
-                   status: str | None = None,
-                   order_by: str = "created_at"
+                   status: bool | None = None,
+                   order_by: str = "id"
     ):
+    
         querry = db.query(TasksDB).filter(TasksDB.user_id == user_id)
 
-        allowerd_other_field = {"created_at", "title", "status"}
-        
         # Filtro
-        if status:
+        if status is not None:
             querry = querry.filter(TasksDB.done == status)
-        # Ordernacao
-        if hasattr(TasksDB, order_by):
-            querry = querry.order_by(asc(getattr(TasksDB, order_by)))
+
+        allowerd_other_field = {"id", "title", "status"}
+
+        querry = querry.order_by(asc(getattr(TasksDB, order_by if order_by in allowerd_other_field else "id")))
+            
     
         #Paginacao   
         offset = (page - 1) * limit
 
         tasks = querry.offset(offset).limit(limit).all()
 
-        
-
-        if order_by not in allowerd_other_field:
-            order_by = "created_at"
-        
-        if user_id != TasksDB.user_id:
-            raise NotAuthorized()
-
-
-        return tasks
-    
+        return {
+            "items" : tasks,
+            "page" : page,
+            "limit" : limit
+        }
 
 
     @staticmethod
@@ -103,11 +98,14 @@ class TaskService:
 
         if not task_existence:
             raise TaskNotFound(task_id)
-
-
+        
 
 
         task = TaskService.list_by_id(db, task_id, user_id)
+
+        if task.user_id != user_id:
+            raise NotAuthorized()
+
 
         db.delete(task)
         db.commit()
@@ -117,15 +115,12 @@ class TaskService:
     def update_task(db: Session, task_id: int, user_id: int, data: TaskUpdate):
 
         task = TaskService.list_by_id(db, task_id, user_id)
-
         
         if not task:
             raise TaskNotFound()
         
-
-
-
-
+        if task.user_id != user_id:
+            raise NotAuthorized()
 
         try:
             for field, value in data.model_dump(exclude_unset=True).items():
