@@ -47,7 +47,7 @@ def test_task_not_found(db_session):
 def test_not_authorized(db_session):
 
     with pytest.raises(NotAuthorized):
-        task =  TaskService.list_tasks(db_session,1)
+        task =  TaskService.list_by_id(db_session,task_id=1, user_id=2)
 
         assert task == 401
 
