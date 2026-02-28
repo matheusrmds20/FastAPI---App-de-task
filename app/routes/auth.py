@@ -31,11 +31,6 @@ def register(user: Create_User, db: Session = Depends(get_db)):
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 
 
-
-    # Rever esse User, parece pegar o primeiro email nao o que a gente quer
-
-
-
     try:
         return UserService.login(db, form_data)
     except BadRequest as m:

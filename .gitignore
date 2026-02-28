@@ -4,13 +4,13 @@ venv/
 env/
 ENV/
 
-# Python (Cache e temporários)
+# Python 
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
 
-# Banco de Dados Local (Importante não subir para não dar erro de conflito)
+# Banco de Dados Local
 
 *app.db
 *test.db
@@ -20,7 +20,7 @@ __pycache__/
 .vscode/
 .idea/
 
-# Distribuição / Pacotes
+# Distribuição/Pacotes
 dist/
 build/
 *.egg-info/

@@ -143,13 +143,13 @@ def test_others_tasksHTTP(client, user_token, db_session):
     db_session.commit()
     db_session.refresh(outra_task)
 
-    # 2. Tentamos acessar essa task usando o token do Usuário 1
+
     headers = {"Authorization": f"Bearer {user_token}"}
     payload = {"title": "Tentando hackear", "description": "Não devia conseguir"}
     
     response = client.patch(f"/tasks/{outra_task.id}/", json=payload, headers=headers)
     print(response.json())
-    # 3. O status esperado é 403 (Proibido)
+
     assert response.status_code == 403
     assert response.json()["detail"] == "Acao nao autorizada"
 
